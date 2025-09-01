@@ -1,5 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preload" href="logo.png" as="image">
+  <title>Salon & Makeup Studio</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #fff; color: #333; }
+
+    /* Navbar */
+    header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;
+      background: rgba(160, 93, 93, 0.6); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; }
+    header .logo img { height: 120px; width: auto; }
+    nav { display: flex; gap: 25px; }
+    nav a { text-decoration: none; font-size: 18px; font-weight: 500; color: #fff; position: relative; transition: 0.3s; }
+    nav a::after { content: ""; position: absolute; left: 0; bottom: -5px; width: 0%; height: 2px; background: #fff; transition: 0.3s; }
+    nav a:hover { color: #000; }
+    nav a:hover::after { width: 100%; }
+
+    /* Hamburger menu */
+    .menu-toggle { display: none; flex-direction: column; cursor: pointer; }
+    .menu-toggle span { height: 3px; width: 25px; background: #fff; margin: 4px 0; transition: 0.3s; }
+    @media (max-width: 768px) {
+      nav { display: none; position: absolute; top: 100%; right: 0; background: rgba(0,0,0,0.9);
+        flex-direction: column; width: 200px; text-align: right; padding: 15px; }
+      nav.active { display: flex; }
+      .menu-toggle { display: flex; }
+    }
+
+    /* Hero */
+    .hero { height: 100vh; background: url("https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1976&auto=format&fit=crop") no-repeat center/cover;
+      display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; color: #fff; padding: 20px; }
+    .hero h2 { font-size: 42px; margin-bottom: 20px; text-shadow: 2px 2px 8px rgba(0,0,0,0.6); }
+    .hero p { font-size: 18px; max-width: 600px; margin-bottom: 30px; text-shadow: 1px 1px 6px rgba(0,0,0,0.5); }
+    .hero button { background: #d63384; color: #fff; padding: 12px 25px; font-size: 16px; border: none; border-radius: 30px; cursor: pointer; transition: 0.3s; }
+    .hero button:hover { background: #b02e6f; }
+
+    /* Section Title */
+    section h2 { font-size: 32px; margin-bottom: 40px; color: #d63384; text-align: center; }
+
+    /* Services & Packages */
+    .grid-section { padding: 60px 20px; background: #f9f9f9; }
+    .grid-boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 1100px; margin: auto; }
+    .box-card { background: #fff; border-radius: 12px; padding: 25px; min-height: 220px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: 0.3s; }
+    .box-card:hover { transform: translateY(-5px); border: 2px solid #d63384; }
+    .box-card h3 { font-size: 20px; margin-bottom: 10px; color: #333; }
+    .box-card p { font-size: 14px; color: #555; margin-bottom: 15px; }
+    .box-card span { font-weight: bold; color: #d63384; margin-bottom: 10px; display: block; }
+    .box-card button { background: #d63384; color: #fff; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; transition: 0.3s; }
+    .box-card button:hover { background: #b02e6f; }
+
+    /* Gallery */
+    .gallery { padding: 60px 20px; background: #fff; text-align: center; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; max-width: 1000px; margin: auto; }
+    .gallery-grid img { width: 100%; height: 250px; object-fit: cover; border-radius: 12px; transition: 0.3s; cursor: pointer; }
+    .gallery-grid img:hover { transform: scale(1.05); }
+
+    /* Lightbox */
+    .lightbox { display: none; position: fixed; z-index: 2000; padding-top: 50px; left: 0; top: 0;
+      width: 100%; height: 100%; background: rgba(0,0,0,0.9); text-align: center; }
+    .lightbox img { max-width: 80%; max-height: 80%; margin-top: 40px; border-radius: 10px; }
+    .lightbox .close { position: absolute; top: 15px; right: 35px; font-size: 40px; color: #fff; cursor: pointer; }
+    .lightbox .prev, .lightbox .next { cursor: pointer; position: absolute; top: 50%; padding: 16px; font-size: 30px; color: white; font-weight: bold; user-select: none; }
+    .lightbox .prev { left: 0; } .lightbox .next { right: 0; }
+
+    /* Reviews */
+    .reviews { padding: 60px 20px; background: #f9f9f9; }
+    .review-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: auto; }
+    .review-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .stars { color: gold; margin-bottom: 10px; }
+
+    /* Appointment Form */
+    .appointment { padding: 60px 20px; background: #fff; text-align: center; }
+    .appointment-form { max-width: 600px; margin: auto; display: flex; flex-direction: column; gap: 15px; }
+    .appointment-form input, .appointment-form select, .appointment-form textarea { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
+    .appointment-form button { background: #d63384; color: #fff; border: none; padding: 12px; font-size: 16px; border-radius: 25px; cursor: pointer; transition: 0.3s; }
+    .appointment-form button:hover { background: #b02e6f; }
+
+    /* Footer */
+    .footer { background: #222; color: #ddd; text-align: center; padding: 40px 20px; }
+    .footer h3 { color: #fff; }
+    .footer a { color: #d63384; text-decoration: none; margin: 0 8px; }
+    .footer a:hover { text-decoration: underline; }
+    .copy { margin-top: 20px; font-size: 14px; color: #888; }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <div class="logo">
+      <img src="logo.png" alt="Khushboo Makeup & Artist Logo" />
+    </div>
+    <div class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></div>
+    <nav id="navbar">
+      <a href="#services">Services</a>
+      <a href="#packages">Packages</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#appointment">Book Appointment</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h2>Salon & Bridal Makeup</h2>
+    <p>Get the perfect look for every occasion with our professional makeup & beauty services.</p>
+    <button onclick="document.getElementById('appointment').scrollIntoView({behavior:'smooth'});">Book Appointment</button>
+  </section>
+
+  <!-- Services -->
+  <section id="services" class="grid-section">
+    <h2>Our Services</h2>
+    <div class="grid-boxes">
+      <div class="box-card"><h3>Hair Styling</h3><p>Trendy cuts, blow-dry & styling for every occasion.</p><span>Starting ₹1,000/-</span></div>
+      <div class="box-card"><h3>Bridal Makeup</h3><p>Perfect bridal makeover with premium products.</p><span>Starting ₹10,000/-</span></div>
+      <div class="box-card"><h3>Facials & Skincare</h3><p>Glow facials & skin treatments for a fresh look.</p><span>Starting ₹4,000/-</span></div>
+      <div class="box-card"><h3>Party Makeup</h3><p>Flawless makeup looks for parties & events.</p><span>Starting ₹15,000/-</span></div>
+    </div>
+  </section>
+
+  <!-- Packages -->
+  <section id="packages" class="grid-section">
+    <h2>Our Packages</h2>
+    <div class="grid-boxes">
+      <div class="box-card"><h3>Basic Glow</h3><ul><li>Hair Wash & Styling</li><li>Express Facial</li><li>Light Makeup</li></ul><span>₹3,000/-</span></div>
+      <div class="box-card"><h3>Bridal Deluxe</h3><ul><li>Bridal Makeup</li><li>Hairstyling</li><li>Draping & Accessories</li></ul><span>₹7,000/-</span></div>
+      <div class="box-card"><h3>Party Glam</h3><ul><li>Full Party Makeup</li><li>Hairstyling</li><li>Nail Polish</li></ul><span>₹5,000/-</span></div>
+      <div class="box-card"><h3>Luxury Spa</h3><ul><li>Premium Facial</li><li>Body Massage</li><li>Hair Spa</li></ul><span>₹10,000/-</span></div>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section id="gallery" class="gallery">
+    <h2>Our Gallery</h2>
+    <div class="gallery-grid">
+      <img src="1.jpg" alt="Makeup 1" onclick="openLightbox(this)">
+      <img src="2.jpg" alt="Makeup 2" onclick="openLightbox(this)">
+      <img src="3.jpg" alt="Makeup 3" onclick="openLightbox(this)">
+      <img src="4.jpg" alt="Makeup 4" onclick="openLightbox(this)">
+      <img src="5.jpg" alt="Makeup 5" onclick="openLightbox(this)">
+      <img src="6.jpg" alt="Makeup 6" onclick="openLightbox(this)">
+      <img src="7.jpg" alt="Makeup 7" onclick="openLightbox(this)">
+      <img src="8.jpg" alt="Makeup 8" onclick="openLightbox(this)">   
+      <img src="9.jpg" alt="Makeup 9" onclick="openLightbox(this)">
+      <img src="10.jpg" alt="Makeup 10" onclick="openLightbox(this)">
+      <img src="11.jpg" alt="Makeup 11" onclick="openLightbox(this)">
+      <img src="12.jpg" alt="Makeup 12" onclick="openLightbox(this)">
+      <img src="13.jpg" alt="Makeup 13" onclick="openLightbox(this)">
+      <img src="14.jpg" alt="Makeup 14" onclick="openLightbox(this)">
+      <img src="15.jpg" alt="Makeup 15" onclick="openLightbox(this)">
+      <img src="16.jpg" alt="Makeup 16" onclick="openLightbox(this)">
+      <img src="17.jpg" alt="Makeup 17" onclick="openLightbox(this)">
+      <img src="18.jpg" alt="Makeup 18" onclick="openLightbox(this)">
+
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox">
+    <span class="close" onclick="closeLightbox()">&times;</span>
+    <img id="lightbox-img" src="" alt="">
+    <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
+    <a class="next" onclick="changeSlide(1)">&#10095;</a>
+  </div>
+
+  <!-- Reviews -->
+  <section id="reviews" class="reviews">
+    <h2>What Our Clients Say</h2>
+    <div class="review-list">
+      <div class="review-card"><h3>Priya Sharma</h3><div class="stars">★★★★★</div><p>Amazing bridal makeup! Everyone complimented my look.</p></div>
+      <div class="review-card"><h3>Neha Gupta</h3><div class="stars">★★★★★</div><p>The facial and hair spa was so relaxing. My skin feels glowing!</p></div>
+      <div class="review-card"><h3>Ritika Singh</h3><div class="stars">★★★★★</div><p>Best party makeup service. They made me look stunning.</p></div>
+    </div>
+  </section>
+
+  <!-- Appointment -->
+  <section id="appointment" class="appointment">
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khushboo Makeup & Artist</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f8f8f8;
+    }
+    header {
+      background: #d63384;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    section {
+      padding: 40px 20px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .appointment-form {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    }
+    .appointment-form input,
+    .appointment-form select,
+    .appointment-form textarea,
+    .appointment-form button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    .appointment-form button {
+      background: #d63384;
+      color: white;
+      font-size: 18px;
+      border: none;
+      cursor: pointer;
+    }
+    .appointment-form button:hover {
+      background: #b02a6b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <h1>Khushboo Makeup & Artist</h1>
+    <p>Book your appointment online</p>
+  </header>
+
+  <!-- Appointment Section -->
+  <section id="appointment">
+    <h2>Book Your Appointment</h2>
+    <form id="appointment-form" class="appointment-form">
+      <input type="text" id="name" name="name" placeholder="Your Full Name" required>
+      <input type="tel" id="phone" name="phone" placeholder="Mobile Number" pattern="[0-9]{10}" maxlength="10" required>
+      
+      <select id="service" name="service" required>
+        <option value="">-- Choose Service --</option>
+        <option value="Bridal Makeup">Bridal Makeup</option>
+        <option value="Party Makeup">Party Makeup</option>
+        <option value="Hair Styling">Hair Styling</option>
+        <option value="Facial">Facial</option>
+        <option value="Mehndi">Mehndi</option>
+      </select>
+      
+      <input type="date" id="date" name="date" required>
+      <input type="time" id="time" name="time" required>
+      <textarea id="message" name="message" placeholder="Any special request?" rows="4"></textarea>
+      <button type="submit">Confirm Appointment</button>
+    </form>
+  </section>
+
+  <!-- WhatsApp Script -->
+  <script>
+    document.getElementById("appointment-form").addEventListener("submit", function(event){
+      event.preventDefault();
+
+      let name = document.getElementById("name").value;
+      let phone = document.getElementById("phone").value;
+      let service = document.getElementById("service").value;
+      let date = document.getElementById("date").value;
+      let time = document.getElementById("time").value;
+      let message = document.getElementById("message").value;
+
+      // 👉 Aapka WhatsApp number (without +, only country code + number)
+      let whatsappNumber = "919784383670";
+
+      let whatsappMessage = `New Appointment Request:%0A
+      👤 Name: ${name}%0A
+      📞 Phone: ${phone}%0A
+      💄 Service: ${service}%0A
+      📅 Date: ${date}%0A
+      ⏰ Time: ${time}%0A
+      📝 Message: ${message}`;
+
+      let url = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+      window.open(url, "_blank");
+    });
+  </script>
+
+</body>
+</html>
+  </section>
+
+  <!-- Footer / Contact -->
+  <section id="contact" class="contact">
+    <footer class="footer">
+      <div class="footer-info">
+        <h3>Khushboo Makeup & Artist</h3>
+        <p><strong>Address:</strong> Sanderao gate ke andar, Mataji mandir ke paas, Sanderao, Rajasthan, 306708</p>
+        <a href="https://maps.app.goo.gl/SzzKqWuYH4Qn23Sk6" target="_blank">Open in Google Maps</a>
+        <p><strong>Phone:</strong> +91 9784383670</p>
+        <p><strong>Email:</strong> khushboomali27584@gmail.com</p>
+      </div>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/khushboo.makeup.artist?igsh=MzRlODBiNWFlZA==">Instagram</a> |
+        <a href="https://wa.me/919784383670?text=%20Khushboo%20Makeup%20%26%20Artist%20-%20Making%20Every%20Bride's%20Dream%20Come%20True%20" target="_blank">WhatsApp</a>
+      </div>
+      <p class="copy">© 2025 Khushboo Makeup & Artist. All Rights Reserved.</p>
+    </footer>
+  </section>
+
+  <!-- JS -->
+  <script>
+    const menuToggle = document.getElementById("menu-toggle");
+    const navbar = document.getElementById("navbar");
+    menuToggle.addEventListener("click", () => { navbar.classList.toggle("active"); });
+
+    let currentIndex = 0;
+    const images = document.querySelectorAll(".gallery-grid img");
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightbox-img");
+
+    function openLightbox(img) {
+      currentIndex = [...images].indexOf(img);
+      lightbox.style.display = "block";
+      lightboxImg.src = img.src;
+    }
+    function closeLightbox() { lightbox.style.display = "none"; }
+    function changeSlide(n) {
+      currentIndex = (currentIndex + n + images.length) % images.length;
+      lightboxImg.src = images[currentIndex].src;
+    }
+    lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
+  </script>
+</body>
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,3 +366,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+ -->
